@@ -4,36 +4,51 @@ async function checkVerification() {
     const h1 = document.querySelector("h1")
     const p = document.querySelector("p")
 
+    // get token from query string
+    const params = (new URL(document.location)).searchParams;
+    const token = params.get("token")
+
+    if (!token) {
+        h1.innerHTML = "Something went wrong."
+        p.innerHTML = "Please click the link in the email that was sent to you."
+
+        console.log("No token found")
+
+        setTimeout(() => {
+            location.href = "index.html"
+        }, 4000)
+        return
+    }
+
     const url = "https://study-buddy-api-server.azurewebsites.net/user/verification"
 
     const options = {
         method: "GET",
+        headers: {
+            Authorization: `Bearer ${token}`
+        }
     }
 
     let response = await fetch(url, options)
 
     if (response.status == 200) {
-        const title = 'Thank you!'
-        const mssg = "You will be redirected to the app momentarily."
-
-        h1.innerHTML = title
-        p.innerHTML = mssg
+        h1.innerHTML = 'Thank you! Your email has been verified.'
+        p.innerHTML = "You will be redirected to the app momentarily."
 
         console.log("Verification successful")
+        localStorage.setItem("token", token);
 
         setTimeout(() => {
-            //location.href = "https://lively-glacier-0949d3f0f.4.azurestaticapps.net/main.html"
             location.href = "main.html"
         }, 4000)
     }
     else {
-        const title = "Something went wrong."
-        const mssg = "Please try verifying your account once more."
+        h1.innerHTML = "Something went wrong."
+        p.innerHTML = "Please try verifying your account once more."
 
         console.log("Error verifying email address")
 
         setTimeout(() => {
-            //location.href = "https://lively-glacier-0949d3f0f.4.azurestaticapps.net/index.html"
             location.href = "index.html"
         }, 4000)
     }
